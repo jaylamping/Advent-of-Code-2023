@@ -21,7 +21,7 @@ const validStrings = [
   ['9', 9],
 ];
 
-fs.readFile('Day_1_input.txt', 'utf-8', (err, data) => {
+fs.readFile('input.txt', 'utf-8', (err, data) => {
   const answer = data.split('\n').reduce((acc, curr) => {
     const tempArray = [];
     validStrings.map((v) => {
