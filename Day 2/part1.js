@@ -1,39 +1,23 @@
 const fs = require('fs');
 
-const redCnt = 12;
-const greenCnt = 13;
-const blueCnt = 14;
+const colorLimits = {
+  red: 12,
+  green: 13,
+  blue: 14,
+};
 
 fs.readFile('input.txt', 'utf8', (err, data) => {
-  const inputArr = data.split('\n');
-  const answer = inputArr.reduce((acc, cur) => {
-    const rollArray = cur.split(': ')[1].split('; ');
-    // .map((roll) => roll.trim().split(', '));
-    console.log(rollArray);
-    rollArray.forEach((roll) => {
-      const colorArray = roll.split(', ');
-      colorArray.forEach((color) => {
-        console.log(color);
-        if (color.includes('red')) {
-          if (parseInt(color.substring(0, color.indexOf(' '))) <= redCnt) {
-            console.log('hi');
-            return acc;
-          }
-        }
-        if (color.includes('blue')) {
-          if (parseInt(color.substring(0, color.indexOf(' '))) <= blueCnt) {
-            return acc;
-          }
-        }
-        if (color.includes('green')) {
-          if (parseInt(color.substring(0, color.indexOf(' '))) <= greenCnt) {
-            return acc;
-          }
-        }
+  const games = data.split('\n');
+  const answer = games.reduce((acc, game) => {
+    const rolls = game.split(': ')[1].split('; ');
+    const isValidGame = rolls.every((roll) => {
+      const colors = roll.trim().split(', ');
+      return colors.every((color) => {
+        const [count, colorName] = color.split(' ');
+        return colorLimits[colorName] ? count <= colorLimits[colorName] : false;
       });
-      console.log(parseInt(cur.substring(5, cur.indexOf(':'))));
-      return acc + parseInt(cur.substring(5, cur.indexOf(':')));
     });
+    return isValidGame ? acc + parseInt(game.split(': ')[0].match(/\d+/)) : acc;
   }, 0);
   console.log(answer);
 });
