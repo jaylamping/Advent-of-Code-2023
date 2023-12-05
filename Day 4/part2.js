@@ -1,77 +1,45 @@
 const fs = require('fs');
 
-let copies = [];
-
-const getMatchCnt = (card) => {
-  let matchCnt = 0;
-
-  const [winnersRaw, numbersRaw] = card.split('|').map((part) => part.trim());
-  const winners = winnersRaw
-    .split(' ')
-    .map(Number)
-    .filter((num) => num > 0);
-  const numbers = numbersRaw
-    .split(' ')
-    .map(Number)
-    .filter((num) => num > 0);
-
-  numbers.forEach((num) => {
-    if (winners.includes(num)) {
-      matchCnt++;
-    }
-  });
-
-  return matchCnt;
-};
-
-const processCards = (originalCards, cardsToProcess) => {
-  let processedCards = [];
-  cardsToProcess.forEach((card) => {
-    const matchCnt = getMatchCnt(card);
-    for (let i = 1; i < matchCnt + 1; i++) {
-      const copyCardNum = card.substring(0, card.indexOf(':')).match(/\d+/g);
-      const cardString = 'Card' + copyCardNum;
-      processedCards.push(
-        originalCards.find((card) => card.startsWith(cardString))
-      );
-    }
-  });
-  if (processedCards) {
-    copies = [...copies, ...processedCards];
-    return true;
-  }
-  return false;
-};
-
 fs.readFile('input.txt', 'utf8', (err, data) => {
-  const cards = data.split('\n').map((card) => {
-    const [cardId, rest] = card.split(':');
-    return (
-      cardId.replace(' ', '').replace(' ', '').replace(' ', '') +
-      ': ' +
-      rest.trim()
-    );
-  });
-  // removing whitespace from card ids
+  const cards = data
+    .split('\n')
+    .map((card) => card.trim())
+    .map((card) => {
+      const [winnersRaw, numbersRaw] = card
+        .split('|')
+        .map((part) => part.trim());
+      const winners = winnersRaw
+        .split(' ')
+        .map(Number)
+        .filter((num) => num > 0);
+      const numbers = numbersRaw
+        .split(' ')
+        .map(Number)
+        .filter((num) => num > 0);
+      return [winners, numbers];
+    });
 
-  //console.log(cards);
-  //
-
-  cards.forEach((card, index) => {
-    const matchCnt = getMatchCnt(card);
-    for (let i = 1; i < matchCnt + 1; i++) {
-      copies.push(cards[index + i]);
-    }
-    if (index == 3) {
-      console.log(matchCnt);
-      console.log(copies);
-    }
-  });
-
-  while (processCards(cards, copies)) {
-    processCards(cards, copies);
+  function countMatches(card, winningNumbers) {
+    return card.filter((number) => winningNumbers.includes(number)).length;
   }
 
-  const combinedCards = [...cards, ...copies];
-  console.log(combinedCards.length);
+  let cardCounts = new Array(cards.length).fill(0);
+  cardCounts[0] = 1;
+
+  let matchesForEachCard = cards.map(([cardNumbers, winningNumbers]) =>
+    countMatches(cardNumbers, winningNumbers)
+  );
+
+  for (let i = 0; i < cards.length; i++) {
+    let copies = cardCounts[i];
+    let matches = matchesForEachCard[i];
+
+    for (let j = 1; j <= matches && i + j < cards.length; j++) {
+      cardCounts[i + j] += copies;
+    }
+  }
+
+  console.log(
+    cardCounts.reduce((total, count) => total + count, 0) + cards.length
+  );
 });
