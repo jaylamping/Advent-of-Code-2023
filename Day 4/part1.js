@@ -3,17 +3,16 @@ const fs = require('fs');
 fs.readFile('input.txt', 'utf8', (err, data) => {
   const cards = data.split('\n').map((card) => card.trim());
 
-  const answer = cards.reduce((acc, curr) => {
+  const answer = cards.reduce((acc, card) => {
     let matchCnt = 0;
     let tempCnt = 0;
 
-    const winners = curr
-      .substring(curr.indexOf(':') + 1, curr.indexOf('|'))
+    const [winnersRaw, numbersRaw] = card.split('|').map((part) => part.trim());
+    const winners = winnersRaw
       .split(' ')
       .map(Number)
       .filter((num) => num > 0);
-    const numbers = curr
-      .substring(curr.indexOf('|') + 1)
+    const numbers = numbersRaw
       .split(' ')
       .map(Number)
       .filter((num) => num > 0);
